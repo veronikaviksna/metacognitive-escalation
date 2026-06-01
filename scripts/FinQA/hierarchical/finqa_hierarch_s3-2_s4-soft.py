@@ -52,7 +52,7 @@ _interrupted = False
 
 def _handle_sigint(sig, frame):
     global _interrupted
-    print("\n\n⚠️  Interrupted — will save checkpoint and exit after current question.")
+    print("\n\n  Interrupted — will save checkpoint and exit after current question.")
     _interrupted = True
 
 signal.signal(signal.SIGINT,  _handle_sigint)
@@ -80,12 +80,12 @@ with open(FINQA_JSON, "r", encoding="utf-8") as f:
 uid_file = _load_json_safe(UIDS_PATH)
 if uid_file:
     record_ids = uid_file
-    print(f"✅ Loaded existing UID list ({len(record_ids)} questions) from {UIDS_PATH}")
+    print(f" Loaded existing UID list ({len(record_ids)} questions) from {UIDS_PATH}")
 else:
     random.seed(RANDOM_STATE)
     record_ids = random.sample(range(len(raw_data)), min(DEMO_SIZE, len(raw_data)))
     _save_json_atomic(record_ids, UIDS_PATH)
-    print(f"✅ Sampled {len(record_ids)} questions, saved UIDs → {UIDS_PATH}")
+    print(f" Sampled {len(record_ids)} questions, saved UIDs → {UIDS_PATH}")
 
 sample = pd.DataFrame([{
     "record_id": idx,
@@ -155,7 +155,7 @@ def load_model(name):
         mdl = AutoModelForCausalLM.from_pretrained(
             name, quantization_config=_bnb_cfg, device_map="auto")
     else:
-        print("  ⚠️  4-bit quantization unavailable — loading in float16")
+        print("    4-bit quantization unavailable — loading in float16")
         mdl = AutoModelForCausalLM.from_pretrained(
             name, torch_dtype=torch.float16, device_map="auto")
     free = (torch.cuda.get_device_properties(0).total_memory
@@ -434,9 +434,9 @@ ckpt = _load_json_safe(CHECKPOINT_PATH)
 if ckpt:
     mc_states  = ckpt["mc_states"]
     _start_idx = ckpt["next_idx"]
-    print(f"\n⚡ Checkpoint found — resuming from {_start_idx}/{len(sample)} ({len(mc_states)} done)")
+    print(f"\n Checkpoint found — resuming from {_start_idx}/{len(sample)} ({len(mc_states)} done)")
 else:
-    print("\n🆕 No checkpoint — starting fresh.")
+    print("\n No checkpoint — starting fresh.")
 
 for q_num, row in sample.iloc[_start_idx:].iterrows():
     if _interrupted:
@@ -496,17 +496,17 @@ for q_num, row in sample.iloc[_start_idx:].iterrows():
         n_red = sum(1 for s in mc_states if s["escalation_type"] == "red_flag")
         print(f"  [{n:4d}/{len(sample)}] slm={acc:.1%}  accept={n_acc}  to_llm={n_esc}  red_flags={n_red}")
         _save_json_atomic({"mc_states": mc_states, "next_idx": _start_idx + n}, CHECKPOINT_PATH)
-        print(f"     💾 Checkpoint saved ({n}/{len(sample)})")
+        print(f"      Checkpoint saved ({n}/{len(sample)})")
 
 unload_model(model_small); del tok_small
 
 if _interrupted:
-    print("\n✅ Checkpoint saved. Run the script again to continue.")
+    print("\n Checkpoint saved. Run the script again to continue.")
     sys.exit(0)
 
 if CHECKPOINT_PATH.exists():
     CHECKPOINT_PATH.unlink()
-    print("✅ Phase 1 complete — checkpoint deleted.")
+    print(" Phase 1 complete — checkpoint deleted.")
 
 # ══════════════════════════════════════════════════════════════════════════
 # PHASE 2: LARGE MODEL
@@ -529,9 +529,9 @@ if to_llm:
                     {k: v for k, v in _saved.items() if k != "_mc_idx"})
             _llm_done_log = ckpt2["llm_done"]
             _llm_start    = len(_llm_done_log)
-            print(f"⚡ LLM checkpoint: resuming from {_llm_start}/{len(to_llm)}")
+            print(f" LLM checkpoint: resuming from {_llm_start}/{len(to_llm)}")
         except (KeyError, IndexError):
-            print("⚠️  LLM checkpoint corrupted — starting LLM phase fresh.")
+            print("  LLM checkpoint corrupted — starting LLM phase fresh.")
 
     model_large, tok_large = load_model(LARGE_MODEL)
 
@@ -576,17 +576,17 @@ if to_llm:
             n_hm = sum(1 for s in to_llm[:i+1] if s["human_escalation"])
             print(f"  [LLM {i+1}/{len(to_llm)}] correct={ok/(i+1):.1%}  →human={n_hm}")
             _save_json_atomic({"llm_done": _llm_done_log}, CHECKPOINT2_PATH)
-            print(f"     💾 LLM checkpoint saved ({i+1}/{len(to_llm)})")
+            print(f"      LLM checkpoint saved ({i+1}/{len(to_llm)})")
 
     unload_model(model_large); del tok_large
 
     if _interrupted:
-        print("\n✅ LLM checkpoint saved. Run the script again to continue.")
+        print("\n LLM checkpoint saved. Run the script again to continue.")
         sys.exit(0)
 
     if CHECKPOINT2_PATH.exists():
         CHECKPOINT2_PATH.unlink()
-        print("✅ Phase 2 complete — LLM checkpoint deleted.")
+        print(" Phase 2 complete — LLM checkpoint deleted.")
 
 # ══════════════════════════════════════════════════════════════════════════
 # ANALYSIS AND METRICS
