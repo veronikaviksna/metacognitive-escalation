@@ -1,0 +1,4 @@
+Dataset,SLM_s_per_q,LLM_s_per_q,Escalation_rate,SLM_total_min,LLM_escalated_min,Hierarchical_min,LLM_only_min,Runtime_reduction,Speedup
+FinQA,17.108,28.635,0.433,285.1,206.6,491.8,477.2,-0.0305,0.97
+ConvFinQA,12.788,23.536,0.273,213.1,107.1,320.2,392.3,0.1837,1.225
+TAT-QA,13.475,24.189,0.286,224.6,115.3,339.9,403.2,0.1569,1.186
