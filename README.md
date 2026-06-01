@@ -3,27 +3,9 @@ Replication package for "Beyond Scaling: Modeling Metacognitive Escalation of Sm
 The pipeline routes questions through a small language model (SLM, Qwen 3B) first. If the SLM's self-monitoring signals indicate low confidence, the question is escalated to a large language model (LLM, Qwen 14B). If the LLM is still uncertain, it escalates to a human reviewer. This three-tier routing is driven entirely by automatically computed monitoring signals — no labelled routing data is required.
 
 Repository layout
-metacognitive-escalation/
-├── data/                   # dataset download links (see data/README.md)
-├── results/                # output CSVs from all runs
-└── scripts/
-    ├── finqa_hierarch_1000.py          # FinQA   — hierarchical pipeline
-    ├── finqa_slm_1000.py               # FinQA   — SLM-only baseline
-    ├── finqa_llm_1000.py               # FinQA   — LLM-only baseline
-    ├── finqa_random_baseline_v2.py     # FinQA   — random-routing baseline
-    ├── finqa_hierarch_1000_signal.py   # FinQA   — signal ablation variant
-    ├── finqa_hierarch_1000_new.py      # FinQA   — threshold ablation variant
-    ├── finqa_ablation_full_vscode.py   # FinQA   — full 8-config ablation (C1–C8)
-    ├── convfinqa_hierarch_1000.py      # ConvFinQA — hierarchical pipeline
-    ├── convfinqa_slm_1000.py           # ConvFinQA — SLM-only baseline
-    ├── convfinqa_llm_1000.py           # ConvFinQA — LLM-only baseline
-    ├── convfinqa_random_baseline_v2.py # ConvFinQA — random-routing baseline
-    ├── tatqa_hierarchical_1000_best.py # TAT-QA  — hierarchical pipeline
-    ├── tatqa2_slm_1000.py              # TAT-QA  — SLM-only baseline
-    ├── tatqa2_1000_llm.py              # TAT-QA  — LLM-only baseline
-    ├── tatqa_random_baseline_v2.py     # TAT-QA  — random-routing baseline
-    ├── runtime_benchmark.py            # inference time measurement
-    └── failure_mode_analysis.py        # qualitative error analysis with full CoT traces
+The scripts/ folder contains four scripts per dataset: the hierarchical pipeline, the SLM-only baseline, the LLM-only baseline, and the random-routing baseline (which matches the hierarchical pipeline's escalation counts but routes randomly). For FinQA, there are additionally an 8-configuration ablation study (finqa_ablation_full_vscode.py), a failure mode analysis script with full CoT traces (failure_mode_analysis.py), and a runtime benchmark (runtime_benchmark.py).
+The results/ folder mirrors this structure — each dataset has its own subfolder with CSVs for every run. The FinQA folder also contains one CSV per ablation configuration (C1–C8) and a runtime tradeoff summary.
+The data/ folder contains the UID files (*_sample_uids.json) for each dataset, which fix the 1000-question sample used across all scripts. The raw dataset files are not included — download links are in data/README.md.
 
 Datasets
 Download the raw data files and place them in the same directory as the scripts (or update the path constants at the top of each script).
